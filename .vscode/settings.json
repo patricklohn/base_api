@@ -1,0 +1,18 @@
+{
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.inheritEnv": true,
+  "terminal.integrated.shellIntegration.enabled": false,
+  "terminal.integrated.profiles.linux": {
+    "bash": {
+      "path": "bash",
+      "args": ["-l"]
+    }
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript", "typescript"],
+  "editor.tabSize": 2,
+  "files.eol": "\n",
+  "js/ts.tsserver.log": "off"
+}

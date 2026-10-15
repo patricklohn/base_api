@@ -1,0 +1,38 @@
+name: Delete merged branch
+
+# Apaga a branch de origem assim que o PR é mergeado, em qualquer branch de destino.
+# Branches de longa duração nunca são apagadas (ex.: PR develop → main mantém a develop).
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  delete-branch:
+    # Só PRs mergeados e com origem neste repositório (branches de forks não podem ser apagadas daqui)
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apagar branch de origem
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          case "$BRANCH" in
+            main | master | develop | homolog | staging | production | release/*)
+              echo "Branch protegida, não será apagada: $BRANCH"
+              exit 0
+              ;;
+          esac
+
+          # Tolerante a branch já apagada (ex.: removida manualmente antes do workflow rodar)
+          if gh api -X DELETE "repos/$REPO/git/refs/heads/$BRANCH"; then
+            echo "Branch apagada: $BRANCH"
+          else
+            echo "Branch não encontrada ou já apagada: $BRANCH"
+          fi

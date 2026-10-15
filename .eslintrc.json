@@ -1,0 +1,227 @@
+{
+  // ==========================================
+  // CONFIGURAÇÕES DE AMBIENTE (VARIÁVEIS GLOBAIS NATIVAS)
+  // ==========================================
+  "env": {
+    "node": true, // Reconhece globais do Node.js (ex: process, require, module)
+    "es2022": true, // Habilita recursos e globais do JavaScript moderno ES2022 (ex: Promises, Async/Await)
+    "jest": true // Reconhece funções do framework de testes Jest (ex: describe, test, expect, jest)
+  },
+
+  // ==========================================
+  // BASES DE REGRAS EXTENDIDAS (HERANÇA)
+  // ==========================================
+  "extends": [
+    "eslint:recommended", // Regras básicas e essenciais recomendadas pelo time do ESLint
+    "plugin:@typescript-eslint/recommended", // Boas práticas e validações específicas para código TypeScript
+    "plugin:prettier/recommended" // Integra o Prettier ao ESLint: roda a formatação visual como se fosse uma regra do ESLint e evita conflitos
+  ],
+
+  // ==========================================
+  // COMPILADOR E CONFIGURAÇÕES DE ANÁLISE ESTÁTICA
+  // ==========================================
+  "parser": "@typescript-eslint/parser", // Define o analisador capaz de ler a sintaxe do TypeScript
+  "parserOptions": {
+    "project": "./tsconfig.eslint.json", // Aponta para o mapa do TypeScript para permitir regras baseadas em tipos reais
+    "tsconfigRootDir": ".", // Define a raiz do projeto para a busca dos arquivos de configuração
+    "sourceType": "module" // Permite o uso da sintaxe moderna de módulos (import/export)
+  },
+
+  // ==========================================
+  // PLUGINS ADICIONAIS (ESTENDEM AS CAPACIDADES DO ESLINT)
+  // ==========================================
+  "plugins": [
+    "@typescript-eslint", // Adiciona superpoderes de validação específicos para TypeScript
+    "check-file", // Plugin responsável por validar se os nomes dos arquivos físicos estão padronizados
+    "prettier" // Garante que o formatador de código Prettier trabalhe junto com o ESLint
+  ],
+
+  // ==========================================
+  // REGRAS DE VALIDAÇÃO CUSTOMIZADAS (O CORAÇÃO DO PROJETO)
+  // ==========================================
+  "rules": {
+    // Integração Prettier: qualquer erro de formatação visual (espaço, aspas, ponto e vírgula) gera um erro no ESLint
+    "prettier/prettier": "error",
+
+    // Uso do 'any': emite um aviso amarelo (warn) ao invés de barrar o build, incentivando o desenvolvedor a tipar corretamente
+    "@typescript-eslint/no-explicit-any": "warn",
+
+    // Desativa a obrigação de declarar explicitamente o tipo de retorno em todas as funções comuns
+    "@typescript-eslint/explicit-function-return-type": "off",
+
+    // Desativa a obrigação de declarar tipos de retorno nas bordas/exportações de módulos
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+
+    // Detecção de variáveis e argumentos criados mas nunca utilizados no código
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_", // IGNORA se o argumento começar com underline (ex: _req, _next)
+        "varsIgnorePattern": "^_" // IGNORA se a variável começar com underline (ex: const _error)
+      }
+    ],
+
+    // ------------------------------------------
+    // DIRETRIZES DE NOMENCLATURA DE CÓDIGO (SÍMBOLOS)
+    // ------------------------------------------
+    "@typescript-eslint/naming-convention": [
+      // Padrão Geral (Fallback): se não cair em nenhuma regra abaixo, usa camelCase obrigatoriamente
+      {
+        "selector": "default",
+        "format": ["camelCase"],
+        "leadingUnderscore": "allow"
+      },
+
+      // 🔒 TRAVA 1: Interfaces obrigatórias com prefixo "i" minúsculo (ex: iUser, iVehicle, iDatabaseService)
+      {
+        "selector": "interface",
+        "format": ["camelCase"],
+        "custom": {
+          "regex": "^i[A-Z]",
+          "match": true
+        }
+      },
+
+      // 🔒 TRAVA 2: Constantes/Variáveis Booleanas obrigatórias com prefixos "is", "has" ou "should" (ex: isActive, hasToken)
+      {
+        "selector": "variable",
+        "types": ["boolean"],
+        "format": ["camelCase"],
+        "custom": {
+          "regex": "^(is|has|should)[A-Z]",
+          "match": true
+        }
+      },
+
+      // Variáveis comuns: aceita camelCase tradicional ou UPPER_CASE para constantes de escopo global
+      {
+        "selector": "variable",
+        "format": ["camelCase", "UPPER_CASE"],
+        "leadingUnderscore": "allow"
+      },
+
+      // Funções declaradas isoladamente: sempre começam com letra minúscula (ex: function generateToken() {})
+      {
+        "selector": "function",
+        "format": ["camelCase"],
+        "leadingUnderscore": "allow"
+      },
+
+      // Classes: sempre começam com letra maiúscula (ex: class UserController {})
+      {
+        "selector": "class",
+        "format": ["PascalCase"]
+      },
+
+      // Métodos de classes: sempre em letras minúsculas (ex: public async execute() {})
+      {
+        "selector": "method",
+        "format": ["camelCase"],
+        "leadingUnderscore": "allow"
+      },
+
+      // Parâmetros de funções: aceita camelCase padrão ou snake_case (comum ao lidar com dados brutos vindos do banco PG)
+      {
+        "selector": "parameter",
+        "format": ["camelCase", "snake_case"],
+        "leadingUnderscore": "allow"
+      },
+
+      // Declarações de Importação: aceita importar objetos em camelCase ou Classes/Tipos em PascalCase
+      {
+        "selector": "import",
+        "format": ["camelCase", "PascalCase"]
+      },
+
+      // Tipagens genéricas (Types/Interfaces globais): devem seguir o formato com letra maiúscula
+      {
+        "selector": "typeLike",
+        "format": ["PascalCase"]
+      },
+
+      // Elementos internos de Enums: aceita letras maiúsculas ou iniciais maiúsculas (ex: STATUS.ACTIVE ou STATUS.Active)
+      {
+        "selector": "enumMember",
+        "format": ["UPPER_CASE", "PascalCase"]
+      },
+
+      // Propriedades de objetos/estruturas: desativado (null) para permitir payloads dinâmicos externos sem quebrar o código
+      {
+        "selector": "property",
+        "format": null,
+        "leadingUnderscore": "allow"
+      }
+    ],
+
+    // ------------------------------------------
+    // DIRETRIZES DE NOMENCLATURA DE ARQUIVOS FÍSICOS (DISCO)
+    // ------------------------------------------
+    "check-file/filename-naming-convention": [
+      "error",
+      {
+        // Obriga todas as camadas principais da API a usarem arquivos em kebab-case (ex: create-user-service.ts)
+        "src/controllers/**/*.ts": "KEBAB_CASE",
+        "src/services/**/*.ts": "KEBAB_CASE",
+        "src/errors/**/*.ts": "KEBAB_CASE",
+        "src/middlewares/**/*.ts": "KEBAB_CASE",
+        "src/plugins/**/*.ts": "KEBAB_CASE",
+        "src/providers/**/*.ts": "KEBAB_CASE",
+        "src/enums/**/*.ts": "KEBAB_CASE"
+      }
+    ],
+
+    // ------------------------------------------
+    // QUALIDADE E EVOLUÇÃO DE CÓDIGO SEGURO
+    // ------------------------------------------
+    // Evita console.log perdidos em produção, mas autoriza explicitamente logs de monitoração reais
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error", "info"]
+      }
+    ],
+
+    "no-debugger": "error", // Proíbe expressamente esquecer comandos 'debugger' ativos no código
+    "prefer-const": "error", // Obriga o uso de 'const' se a variável nunca for reatribuída/sofrer mutação direta
+    "no-var": "error", // Proíbe totalmente a utilização do antigo e inseguro escopo de variável 'var'
+    "eqeqeq": ["error", "always"], // Obriga o uso exclusivo do operador de igualdade estrita de três iguais (===)
+    "curly": ["error", "all"] // Obriga o uso de chaves bloco {} em condicionais (if/else), mesmo se possuírem uma única linha
+  },
+
+  // ==========================================
+  // EXCEÇÕES E AFINAMENTOS RESTRITOS POR ARQUIVO
+  // ==========================================
+  "overrides": [
+    {
+      // Desliga a regra restrita de arquivos em 'kebab-case' para pontos estruturais aceitáveis ou gerados por CLI
+      "files": [
+        "src/services/**/index.ts", // Arquivos de exportação raiz
+        "src/providers/**/index.ts", // Arquivos de exportação raiz
+        "src/providers/**/types.ts", // Arquivos globais de contratos de tipos
+        "src/**/__tests__/**/*.ts", // Pastas internas de testes do Jest
+        "src/database/migrations/**/*.ts", // Migrações do banco (Knex/Kysely geram arquivos com timestamp/snake_case)
+        "src/database/seeds/**/*.ts" // Arquivos de sementes populadoras de banco de dados
+      ],
+      "rules": {
+        "check-file/filename-naming-convention": "off"
+      }
+    },
+    {
+      // Desliga o aviso de proteção contra o tipo 'any' em locais de mock ou de queries SQL puras
+      "files": ["src/tests/**/*.ts", "src/database/migrations/**/*.ts", "src/database/seeds/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ],
+
+  // ==========================================
+  // PASTAS E ARQUIVOS COMPLETAMENTE IGNORADOS PELO ESLINT
+  // ==========================================
+  "ignorePatterns": [
+    "dist", // Ignora a pasta de build final compilada
+    "node_modules", // Ignora códigos de bibliotecas externas de terceiros
+    "*.js", // Ignora arquivos JavaScript puros da raiz (como configs antigas)
+    "pnpm-lock.yaml" // Otimização: ignora o mapa de travas de pacotes do pnpm para poupar memória no escaneamento
+  ]
+}

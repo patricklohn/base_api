@@ -1,0 +1,17 @@
+# Typecheck (tsgo) e testes unitários em paralelo; o build só roda se os dois passarem.
+# A saída de cada etapa só aparece quando ela falha.
+logs=$(mktemp -d)
+trap 'rm -rf "$logs"' EXIT
+
+pnpm -s typecheck:fast >"$logs/typecheck.log" 2>&1 &
+typecheck_pid=$!
+pnpm -s test >"$logs/test.log" 2>&1 &
+test_pid=$!
+
+failed=0
+if wait "$typecheck_pid"; then echo "✔ typecheck"; else echo "✖ typecheck falhou:"; cat "$logs/typecheck.log"; failed=1; fi
+if wait "$test_pid"; then echo "✔ testes unitários"; else echo "✖ testes unitários falharam:"; cat "$logs/test.log"; failed=1; fi
+[ "$failed" -eq 0 ] || exit 1
+
+pnpm -s build:fast >"$logs/build.log" 2>&1 || { echo "✖ build falhou:"; cat "$logs/build.log"; exit 1; }
+echo "✔ build"
